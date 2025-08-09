@@ -7,7 +7,7 @@ dotenv.config({ path: '.env.local' });
 const router = express.Router();
 const userClient = new WebClient(process.env.SLACK_USER_TOKEN);
 
-router.get('/messages', async (req, res) => {
+router.get('/', async (req, res) => {
   const { id, type } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -28,7 +28,10 @@ router.get('/messages', async (req, res) => {
       const scheduled = await userClient.chat.scheduledMessages.list({
         channel: channelId,
       });
-      results.scheduled = scheduled.scheduled_messages;
+      results.scheduled = (scheduled.scheduled_messages || []).map((msg) => ({
+        ...msg,
+        scheduled_message_id: msg.id, // alias 'id' to 'scheduled_message_id'
+      }));
     }
 
     if (!type || type === 'history') {

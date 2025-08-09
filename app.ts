@@ -3,6 +3,7 @@ import { WebClient } from "@slack/web-api";
 import messageRouter from "./routes/getMessages";
 import scheduleRouter from "./routes/scheduler";
 import deleteRouter from "./routes/deleter";
+import sendmag from "./routes/directmsg";
 import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -17,9 +18,10 @@ receiver.router.use(cors());
 receiver.router.use(express.json()); 
 
 
-receiver.router.use("/", messageRouter);
+receiver.router.use("/messages", messageRouter);
 receiver.router.use("/schedule", scheduleRouter);
 receiver.router.use("/delete", deleteRouter);
+receiver.router.use("/send", sendmag);
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
