@@ -7,9 +7,7 @@ import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { InstallProvider } from '@slack/oauth';
 import installRouter from "./routes/install"; 
-
 
 dotenv.config({ path: ".env.local" });
 

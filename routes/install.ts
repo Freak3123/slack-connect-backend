@@ -1,9 +1,22 @@
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import { InstallProvider } from "@slack/oauth";
 import express, { Request, Response } from "express";
 import SlackInstallation from "../models/SlackInstallation";
 
 dotenv.config();
+
+if (!process.env.MONGO_URI) {
+  throw new Error("Missing MONGO_URI in environment variables");
+}
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 if (
   !process.env.SLACK_CLIENT_ID ||
@@ -39,7 +52,6 @@ router.get("/install", async (req: Request, res: Response) => {
 // Handle callback
 router.get("/oauth_redirect", async (req: Request, res: Response) => {
   try {
-    // Force the correct structure since the library returns `void`
     const result = (await installer.handleCallback(req, res)) as unknown as {
       team?: { id?: string; name?: string };
       bot?: { token?: string; userId?: string };
@@ -52,7 +64,6 @@ router.get("/oauth_redirect", async (req: Request, res: Response) => {
       throw new Error("Missing installation data");
     }
 
-    // Save or update team installation
     await SlackInstallation.findOneAndUpdate(
       { teamId: team.id },
       {
@@ -66,7 +77,6 @@ router.get("/oauth_redirect", async (req: Request, res: Response) => {
       { upsert: true, new: true }
     );
 
-    // Redirect to frontend success page
     res.redirect(
       `${process.env.FRONTEND_URL}/slack/success?team=${encodeURIComponent(
         team.name
