@@ -62,7 +62,6 @@ router.get("/install", async (req: Request, res: Response) => {
 
 router.get("/oauth/callback", async (req: Request, res: Response) => {
   const code = req.query.code as string;
-  console.log("Received OAuth code:", code);
 
   if (!code) {
     return res.status(400).json({ error: "Missing code parameter" });
@@ -77,13 +76,16 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
         client_id: process.env.SLACK_CLIENT_ID || "",
         client_secret: process.env.SLACK_CLIENT_SECRET || "",
         redirect_uri: process.env.SLACK_REDIRECT_URI || "", 
+
       }),
+
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }
     );
 
     const data = response.data;
+    console.log("Received access tokens:", data);
 
     if (!data.ok) {
       console.error("Slack OAuth error:", data.error);
@@ -93,10 +95,10 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
     const existingInstallation = await SlackInstallation.findOne({
       teamId: data.team.id,
     });
+    console.log("Existing installation found:", existingInstallation);
 
     if (existingInstallation) {
-      existingInstallation.botToken = data.access_token;
-      console.log("Updating existing installation:", data.access_token);
+      existingInstallation.userToken = data.authed_user.access_token;
       existingInstallation.teamName = data.team.name;
       existingInstallation.userId = data.authed_user.id;
       existingInstallation.scope = data.scope;
@@ -106,7 +108,7 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
       const installation = new SlackInstallation({
         teamId: data.team.id,
         teamName: data.team.name,
-        botToken: data.access_token,
+        userToken: data.authed_user.access_token,
         userId: data.authed_user.id,
         scope: data.scope,
         userScope: data.authed_user.scope,
@@ -115,7 +117,7 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
     }
 
 
-    console.log("Slack installation saved:", data.team.name);
+    // console.log("Slack installation saved:", data.team.name);
 
     res.json({
       ok: true,
