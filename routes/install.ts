@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { InstallProvider } from "@slack/oauth";
 import express, { Request, Response } from "express";
 import SlackInstallation from "../models/SlackInstallation";
+import axios from "axios";
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ const installer = new InstallProvider({
 router.get("/install", async (req: Request, res: Response) => {
   try {
     const url = await installer.generateInstallUrl({
-      scopes: ["chat:write", "channels:read"],
+      scopes: [],
       userScopes: [
         "channels:read",
         "groups:read",
@@ -46,13 +47,12 @@ router.get("/install", async (req: Request, res: Response) => {
         "mpim:read",
         "users:read",
         "chat:write",
-        "chat:write.public",
-        "channels:manage",
-        "chat:write.customize",
-        "reminders:write",
+        "team:read",
       ],
       metadata: "some_metadata",
     });
+    console.log("Generated install URL:", url);
+    
     res.redirect(url);
   } catch (err) {
     console.error("Error generating install URL:", err);
@@ -60,42 +60,73 @@ router.get("/install", async (req: Request, res: Response) => {
   }
 });
 
-// Handle callback
-router.get("/oauth_redirect", async (req: Request, res: Response) => {
+router.get("/oauth/callback", async (req: Request, res: Response) => {
+  const code = req.query.code as string;
+  console.log("Received OAuth code:", code);
+
+  if (!code) {
+    return res.status(400).json({ error: "Missing code parameter" });
+  }
+
   try {
-    const result = (await installer.handleCallback(req, res)) as unknown as {
-      team?: { id?: string; name?: string };
-      bot?: { token?: string; userId?: string };
-      user?: { token?: string };
-    };
+    // Exchange code for access tokens with Slack API
+    const response = await axios.post(
+      "https://slack.com/api/oauth.v2.access",
+      new URLSearchParams({
+        code,
+        client_id: process.env.SLACK_CLIENT_ID || "",
+        client_secret: process.env.SLACK_CLIENT_SECRET || "",
+        redirect_uri: process.env.SLACK_REDIRECT_URI || "", 
+      }),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
 
-    const { team, bot, user } = result;
+    const data = response.data;
 
-    if (!team?.id || !team?.name || !bot?.token) {
-      throw new Error("Missing installation data");
+    if (!data.ok) {
+      console.error("Slack OAuth error:", data.error);
+      return res.status(400).json({ error: data.error });
     }
 
-    await SlackInstallation.findOneAndUpdate(
-      { teamId: team.id },
-      {
-        teamId: team.id,
-        teamName: team.name,
-        botToken: bot.token,
-        botUserId: bot.userId,
-        userToken: user?.token || null,
-        installedAt: new Date(),
-      },
-      { upsert: true, new: true }
-    );
+    const existingInstallation = await SlackInstallation.findOne({
+      teamId: data.team.id,
+    });
 
-    res.redirect(
-      `${process.env.FRONTEND_URL}/slack/success?team=${encodeURIComponent(
-        team.name
-      )}`
-    );
+    if (existingInstallation) {
+      existingInstallation.botToken = data.access_token;
+      console.log("Updating existing installation:", data.access_token);
+      existingInstallation.teamName = data.team.name;
+      existingInstallation.userId = data.authed_user.id;
+      existingInstallation.scope = data.scope;
+      existingInstallation.userScope = data.authed_user.scope;
+      await existingInstallation.save();
+    } else {
+      const installation = new SlackInstallation({
+        teamId: data.team.id,
+        teamName: data.team.name,
+        botToken: data.access_token,
+        userId: data.authed_user.id,
+        scope: data.scope,
+        userScope: data.authed_user.scope,
+      });
+      await installation.save();
+    }
+
+
+    console.log("Slack installation saved:", data.team.name);
+
+    res.json({
+      ok: true,
+      team: {
+        id: data.team.id,
+        name: data.team.name,
+      },
+    });
   } catch (error) {
-    console.error("Error handling OAuth callback:", error);
-    res.redirect(`${process.env.FRONTEND_URL}/slack/error`);
+    console.error("Error during Slack OAuth token exchange:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

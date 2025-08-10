@@ -5,18 +5,22 @@ import deleteRouter from "./routes/deleter";
 import sendmag from "./routes/directmsg";
 import installRouter from "./routes/install"; 
 import recipient from "./routes/recipient";
+import getTeams from "./routes/getTeams";
 import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-
 
 dotenv.config({ path: ".env.local" });
 
 const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET || "",
 });
-receiver.router.use(cors());
+receiver.router.use(cors({
+  origin: "https://slack-connect-silk.vercel.app", 
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 receiver.router.use(express.json()); 
 receiver.router.use("/messages", messageRouter);
 receiver.router.use("/schedule", scheduleRouter);
@@ -24,6 +28,7 @@ receiver.router.use("/delete", deleteRouter);
 receiver.router.use("/send", sendmag);
 receiver.router.use("/slack", installRouter);
 receiver.router.use("/recipient", recipient);
+receiver.router.use("/teams", getTeams);
 
 mongoose
   .connect(process.env.MONGO_URI as string)

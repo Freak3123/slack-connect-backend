@@ -15,7 +15,7 @@ router.get("/", async (req: Request, res: Response) => {
     const installation = await SlackInstallation.findOne({ teamId });
     if (!installation) return res.status(404).json({ error: "Team not found" });
 
-    const client = new WebClient(installation.botToken);
+    const client = new WebClient(installation.userToken);
 
     let users: Array<{ id: string; name: string }> = [];
     let cursor: string | undefined = undefined;
