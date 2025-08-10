@@ -39,7 +39,18 @@ router.get("/install", async (req: Request, res: Response) => {
   try {
     const url = await installer.generateInstallUrl({
       scopes: ["chat:write", "channels:read"],
-      userScopes: [],
+      userScopes: [
+        "channels:read",
+        "groups:read",
+        "im:read",
+        "mpim:read",
+        "users:read",
+        "chat:write",
+        "chat:write.public",
+        "channels:manage",
+        "chat:write.customize",
+        "reminders:write",
+      ],
       metadata: "some_metadata",
     });
     res.redirect(url);

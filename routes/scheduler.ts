@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Team not found" });
     }
 
-    const client = new WebClient(installation.botToken);
+    const client = new WebClient(installation.userToken);
 
     let channelId: string;
     let targetName: string;
