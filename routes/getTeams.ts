@@ -4,7 +4,7 @@ import SlackInstallation from "../models/SlackInstallation";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (req, res) => {
   try {
     console.log("ljouishiudbhjdgbjhdgbyjhdgyf")
     const teams = await SlackInstallation.find({}, { teamId: 1, teamName: 1, _id: 0 });
