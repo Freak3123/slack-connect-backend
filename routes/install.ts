@@ -48,7 +48,6 @@ router.get("/install", async (req: Request, res: Response) => {
         "users:read",
         "chat:write",
         "team:read",
-        "offline_access"
       ],
       metadata: "some_metadata",
     });
