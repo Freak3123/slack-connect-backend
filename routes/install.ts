@@ -48,6 +48,7 @@ router.get("/install", async (req: Request, res: Response) => {
         "users:read",
         "chat:write",
         "team:read",
+        "offline_access"
       ],
       metadata: "some_metadata",
     });
@@ -75,10 +76,8 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
         code,
         client_id: process.env.SLACK_CLIENT_ID || "",
         client_secret: process.env.SLACK_CLIENT_SECRET || "",
-        redirect_uri: process.env.SLACK_REDIRECT_URI || "", 
-
+        redirect_uri: process.env.SLACK_REDIRECT_URI || "",
       }),
-
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }
@@ -92,6 +91,11 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
       return res.status(400).json({ error: data.error });
     }
 
+    // Calculate token expiration datetime
+    const now = new Date();
+    const expiresInSeconds = data.expires_in; // number of seconds token lasts
+    const tokenExpiresAt = new Date(now.getTime() + expiresInSeconds * 1000);
+
     const existingInstallation = await SlackInstallation.findOne({
       teamId: data.team.id,
     });
@@ -99,6 +103,8 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
 
     if (existingInstallation) {
       existingInstallation.userToken = data.authed_user.access_token;
+      existingInstallation.refreshToken = data.authed_user.refresh_token; 
+      existingInstallation.tokenExpiresAt = tokenExpiresAt; 
       existingInstallation.teamName = data.team.name;
       existingInstallation.userId = data.authed_user.id;
       existingInstallation.scope = data.scope;
@@ -109,15 +115,14 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
         teamId: data.team.id,
         teamName: data.team.name,
         userToken: data.authed_user.access_token,
+        refreshToken: data.authed_user.refresh_token, 
+        tokenExpiresAt,                      
         userId: data.authed_user.id,
         scope: data.scope,
         userScope: data.authed_user.scope,
       });
       await installation.save();
     }
-
-
-    // console.log("Slack installation saved:", data.team.name);
 
     res.json({
       ok: true,

@@ -3,9 +3,9 @@ import { Schema, model, models, Document } from "mongoose";
 export interface ISlackInstallation extends Document {
   teamId: string;
   teamName: string;
-  botToken?: string;
-  botUserId?: string;
   userToken: string;
+  refreshToken?: String;
+  tokenExpiresAt?: Date;
   installedAt: Date;
 }
 
@@ -13,13 +13,13 @@ const SlackInstallationSchema = new Schema<ISlackInstallation>(
   {
     teamId: { type: String, required: true, unique: true },
     teamName: { type: String, required: true },
-    botToken: { type: String },
-    botUserId: { type: String },
     userToken: { type: String, required: true },
+    refreshToken: { type: String, required: false },
+    tokenExpiresAt: { type: Date, required: false },
     installedAt: { type: Date, default: Date.now },
   },
   {
-    timestamps: true, 
+    timestamps: true,
     collection: "slack_installations",
   }
 );
