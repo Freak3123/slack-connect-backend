@@ -1,6 +1,7 @@
 import express from "express";
 import { WebClient } from "@slack/web-api";
 import SlackInstallation from "../models/SlackInstallation";
+import { scheduler } from "node:timers/promises";
 
 const router = express.Router();
 
@@ -39,21 +40,22 @@ router.get("/", async (req, res) => {
 
     const results: Record<string, any> = {};
 
-    if (!type || type === "scheduled") {
       const scheduled = await client.chat.scheduledMessages.list({ channel: channelId });
       results.scheduled = (scheduled.scheduled_messages || []).map((msg) => ({
         ...msg,
         scheduled_message_id: msg.id,
       }));
-    }
 
-    if (!type || type === "history") {
+    console.log((await client.chat.scheduledMessages.list({ channel: channelId })).scheduled_messages)
+
       const history = await client.conversations.history({
         channel: channelId,
         limit: 20,
       });
       results.history = history.messages;
-    }
+
+    console.log({...results})
+
 
     res.json({
       teamName: installation.teamName,
