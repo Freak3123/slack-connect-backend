@@ -4,6 +4,7 @@ import { InstallProvider } from "@slack/oauth";
 import express, { Request, Response } from "express";
 import SlackInstallation from "../models/SlackInstallation";
 import axios from "axios";
+import { console } from "inspector";
 
 dotenv.config();
 
@@ -93,6 +94,7 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
     // Calculate token expiration datetime
     const now = new Date();
     const expiresInSeconds = data.expires_in; // number of seconds token lasts
+    console.log(expiresInSeconds);
     const tokenExpiresAt = new Date(now.getTime() + expiresInSeconds * 1000);
 
     const existingInstallation = await SlackInstallation.findOne({
@@ -106,8 +108,6 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
       existingInstallation.tokenExpiresAt = tokenExpiresAt; 
       existingInstallation.teamName = data.team.name;
       existingInstallation.userId = data.authed_user.id;
-      existingInstallation.scope = data.scope;
-      existingInstallation.userScope = data.authed_user.scope;
       await existingInstallation.save();
     } else {
       const installation = new SlackInstallation({
@@ -117,8 +117,6 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
         refreshToken: data.authed_user.refresh_token, 
         tokenExpiresAt,                      
         userId: data.authed_user.id,
-        scope: data.scope,
-        userScope: data.authed_user.scope,
       });
       await installation.save();
     }
