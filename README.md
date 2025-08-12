@@ -6,13 +6,13 @@ Slack Connect is a full-stack application that enables users to connect their Sl
 
 - **Frontend (Next.js + Tailwind CSS)**
 
-  GitHub: [freak3123/slack-connect](freak3123/slack-connect)
+  GitHub: [ https://github.com/Freak3123/slack-connect]( https://github.com/Freak3123/slack-connect)
 
   Live: [https://slack-connect-silk.vercel.app/](https://slack-connect-silk.vercel.app/)
 
 - **Backend (Node.js + Express + MongoDB)**
 
-  GitHub: [freak3123/slack-connect-backend](freak3123/slack-connect-backend)
+  GitHub: [ https://github.com/Freak3123/slack-connect-backend](https://github.com/Freak3123/slack-connect-backend)
 
   Live: [https://slack-connect-backend-1.onrender.com](https://slack-connect-backend-1.onrender.com)
 
