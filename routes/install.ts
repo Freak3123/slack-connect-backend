@@ -94,7 +94,7 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
 
     // Calculate token expiration datetime
     const now = new Date();
-    const expiresInSeconds = data.expires_in; // number of seconds token lasts
+    const expiresInSeconds = data.authed_user.expires_in; // number of seconds token lasts
     console.log(expiresInSeconds);
     const tokenExpiresAt = new Date(now.getTime() + expiresInSeconds * 1000);
 
