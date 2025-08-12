@@ -10,6 +10,7 @@ import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import {getValidAccessToken} from "./lib/tokenValidity"
 
 dotenv.config({ path: ".env.local" });
 
@@ -29,6 +30,7 @@ receiver.router.use("/send", sendmag);
 receiver.router.use("/slack", installRouter);
 receiver.router.use("/recipient", recipient);
 receiver.router.use("/teams", getTeams);
+receiver.router.use("/validate", getValidAccessToken)
 
 mongoose
   .connect(process.env.MONGO_URI as string)
