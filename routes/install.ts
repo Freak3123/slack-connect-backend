@@ -122,13 +122,16 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
       await installation.save();
     }
 
-    res.json({
-      ok: true,
-      team: {
-        id: data.team.id,
-        name: data.team.name,
-      },
-    });
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    res.redirect(`${frontendUrl}?teamId=${data.team.id}`);
+
+    // res.json({
+    //   ok: true,
+    //   team: {
+    //     id: data.team.id,
+    //     name: data.team.name,
+    //   },
+    // });
   } catch (error) {
     console.error("Error during Slack OAuth token exchange:", error);
     res.status(500).json({ error: "Internal server error" });
