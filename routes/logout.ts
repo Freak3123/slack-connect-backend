@@ -6,6 +6,7 @@ const router = express.Router();
 router.post("/logout/:teamId", async (req: Request, res: Response) => {
   try {
     const { teamId } = req.params;
+    console.log(req.params)
     await SlackInstallation.deleteOne({ teamId });
 
     res.json({ success: true, message: "Logged out successfully" });
