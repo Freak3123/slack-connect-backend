@@ -7,6 +7,7 @@ import installRouter from "./routes/install";
 import recipient from "./routes/recipient";
 import getTeams from "./routes/getTeams";
 import validateRouter from "./routes/validate";
+import logoutRouter from "./routes/logout";
 import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
@@ -33,6 +34,7 @@ receiver.router.use("/recipient", recipient);
 receiver.router.use("/teams", getTeams);
 receiver.router.use("/validate", getValidAccessToken)
 receiver.router.use("/slack", validateRouter);
+receiver.router.use("/slack", logoutRouter);
 
 mongoose
   .connect(process.env.MONGO_URI as string)
