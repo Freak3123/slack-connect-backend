@@ -74,9 +74,6 @@ Slack Connect is a full-stack application that enables users to connect their Sl
 - **Extensibility:**  
   The modular route structure allows easy addition of new Slack API features or other integrations.
 
-- **Session Management:**  
-  If you implement user sessions or authentication, ensure secure cookie handling and session expiration.
-
 - **Deployment & Redirect URLs:**  
   Slack OAuth Redirect URLs **do not support `http://` on localhost**.  
   This means the OAuth flow **will not work properly when running locally over `http://localhost`**.  
@@ -86,6 +83,11 @@ Slack Connect is a full-stack application that enables users to connect their Sl
 - **Deployment:**  
   When deploying, set environment variables securely in your hosting platform and configure network access to MongoDB.
 
+## My Deployment Details
+
+- The **frontend** of this project is hosted on **Vercel** — providing fast, globally distributed serverless hosting optimized for Next.js apps.
+
+- The **backend** API server is hosted on **Render** — a reliable cloud platform suitable for running Node.js Express applications with MongoDB connectivity.
 
 
 ## Architectural Overview
