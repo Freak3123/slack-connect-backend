@@ -83,8 +83,9 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
       }
     );
 
+
     const data = response.data;
-    console.log("Received access tokens:", response);
+    console.log("Received access tokens:", response.data);
 
     if (!data.ok) {
       console.error("Slack OAuth error:", data.error);
