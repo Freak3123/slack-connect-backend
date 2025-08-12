@@ -6,6 +6,7 @@ export interface ISlackInstallation extends Document {
   userToken: string;
   refreshToken?: String;
   tokenExpiresAt?: Date;
+  userId?: string;
   installedAt: Date;
 }
 
@@ -16,6 +17,7 @@ const SlackInstallationSchema = new Schema<ISlackInstallation>(
     userToken: { type: String, required: true },
     refreshToken: { type: String, required: false },
     tokenExpiresAt: { type: Date, required: false },
+    userId: { type: String, required: false },
     installedAt: { type: Date, default: Date.now },
   },
   {

@@ -4,7 +4,6 @@ import { InstallProvider } from "@slack/oauth";
 import express, { Request, Response } from "express";
 import SlackInstallation from "../models/SlackInstallation";
 import axios from "axios";
-import { console } from "inspector";
 
 dotenv.config();
 
@@ -63,6 +62,7 @@ router.get("/install", async (req: Request, res: Response) => {
 
 router.get("/oauth/callback", async (req: Request, res: Response) => {
   const code = req.query.code as string;
+  console.log("-----");
 
   if (!code) {
     return res.status(400).json({ error: "Missing code parameter" });
@@ -84,7 +84,7 @@ router.get("/oauth/callback", async (req: Request, res: Response) => {
     );
 
     const data = response.data;
-    console.log("Received access tokens:", data);
+    console.log("Received access tokens:", response);
 
     if (!data.ok) {
       console.error("Slack OAuth error:", data.error);
