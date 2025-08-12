@@ -31,7 +31,7 @@ Slack Connect is a full-stack application that enables users to connect their Sl
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/freak3123-slack-connect-backend.git
+   git clone https://github.com/Freak3123/slack-connect-backend.git
    cd freak3123-slack-connect-backend
    ```
 
